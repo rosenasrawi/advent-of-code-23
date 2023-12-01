@@ -1,7 +1,7 @@
 from _getinput import *
 import regex as re
 
-calibration = getinput(day = '01')
+# --- Day 1: Trebuchet?! ---
 
 def get_sum(calibration, word_incl = False):
 
@@ -33,6 +33,8 @@ def get_sum(calibration, word_incl = False):
         calib_sum += int(nums[0]+nums[-1])
 
     return calib_sum
+
+calibration = getinput(day = '01')
 
 print('Part 1:', get_sum(calibration))
 print('Part 2:', get_sum(calibration, word_incl=True))
