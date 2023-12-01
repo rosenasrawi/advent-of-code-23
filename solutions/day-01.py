@@ -3,12 +3,10 @@ import regex as re
 
 calibration = getinput(day = '01')
 
-def sum_num_int(calibration, inclwords = False):
-    
-    word2num = {'one': 1, 'two': 2, 'three':3, 'four':4, 'five':5, 'six':6, 'seven':7, 'eight':8, 'nine':9}
-    words = word2num.keys()
+def sum_nums(calibration, inclwords = False):
 
-    pattern = '|'.join(words)
+    word2num = {'one': 1, 'two': 2, 'three':3, 'four':4, 'five':5, 'six':6, 'seven':7, 'eight':8, 'nine':9}
+    pattern = '|'.join(word2num.keys())
 
     calib_int = []
 
@@ -16,7 +14,7 @@ def sum_num_int(calibration, inclwords = False):
 
         if inclwords:
             numbers = re.findall(rf'{pattern}|\d', c, overlapped=True)
-            numbers = [str(word2num[num]) if num in words else num for num in numbers]
+            numbers = [str(word2num[num]) if num in word2num.keys() else num for num in numbers]
 
         else: 
             numbers = re.findall(r'\d', c)
@@ -27,5 +25,5 @@ def sum_num_int(calibration, inclwords = False):
 
     return sum(calib_int)
 
-print('Part 1:', sum_num_int(calibration))
-print('Part 2:', sum_num_int(calibration, inclwords=True))
+print('Part 1:', sum_nums(calibration))
+print('Part 2:', sum_nums(calibration, inclwords=True))
