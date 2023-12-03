@@ -3,68 +3,83 @@ import regex as re
 
 # --- Day 2: Cube Conundrum ---
 
-bag = {
-    'red': 12,
-    'green': 13,
-    'blue': 14
-}
+def get_games():
 
-games = getinput('02', example=False)
+    games = getinput('02', example=False)
 
-totalIDs = 0
+    for i, line in enumerate(games):
 
-for g in games:
+        game, picks = line.split(':')
 
-    game, picks = g.split(':')
+        game = int(re.sub('\D', '', game))
 
-    game = int(re.sub('\D', '', game))
+        picks = re.sub(',', '', picks).split(';')
+        picks = [pick.split() for pick in picks]
 
-    picks = re.sub(',', '', picks).split(';')
-    picks = [pick.split() for pick in picks]
+        games[i] = [game, picks]
+    
+    return games
 
-    for pick in picks:
-        while len(pick) >= 2:
-            num = pick.pop(0)
-            col = pick.pop(0)
 
-            possible = bag[col] >= int(num)
+def test_games():
 
-            if not possible:
-                break
-        
-        if not possible:
-            break
-
-    if possible: 
-        totalIDs+=game
-
-print(totalIDs)
-
-power = 0
-
-for g in games:
+    games = get_games()
 
     bag = {
-        'red': 0,
-        'green': 0,
-        'blue': 0
+        'red': 12,
+        'green': 13,
+        'blue': 14
     }
 
-    game, picks = g.split(':')
+    totalIDs = 0
 
-    game = int(re.sub('\D', '', game))
+    for round in games:
+        game, picks = round
 
-    picks = re.sub(',', '', picks).split(';')
-    picks = [pick.split() for pick in picks]
+        for pick in picks:
 
-    for pick in picks:
-        while len(pick) >= 2:
-            num = pick.pop(0)
-            col = pick.pop(0)
+            while pick:
+                num = int(pick.pop(0))
+                col = pick.pop(0)
 
-            if bag[col] < int(num):
-                bag[col] = int(num)
+                impossible = bag[col] < num
 
-    power += bag['red']*bag['blue']*bag['green']
+                if impossible: break
+            
+            if impossible: break
 
-print(power)
+        if not impossible: 
+            totalIDs+=game
+
+    return totalIDs
+
+def get_power():
+
+    games = get_games()
+
+    power = 0
+
+    for round in games:
+
+        bag = {
+            'red': 0,
+            'green': 0,
+            'blue': 0
+        }
+
+        game, picks = round
+
+        for pick in picks:
+            while len(pick) >= 2:
+                num = pick.pop(0)
+                col = pick.pop(0)
+
+                if bag[col] < int(num):
+                    bag[col] = int(num)
+
+        power += bag['red']*bag['blue']*bag['green']
+
+    return power
+
+print('Part 1:', test_games())
+print('Part 2:', get_power())
