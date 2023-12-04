@@ -1,19 +1,17 @@
 from _getinput import *
-
 import regex as re
 
 # --- Day 3: Gear Ratios ---
 
-def get_engine(border = False):
+def get_engine():
 
     engine = getinput(day = '03', example=False)
 
-    if border:
-        engine = ['.' + line + '.' for line in engine]
-        newline = '.' * int(len(engine)+1)
+    engine = ['.' + line + '.' for line in engine]
+    newline = '.' * int(len(engine)+1)
 
-        engine.insert(0, newline)
-        engine.append(newline)
+    engine.insert(0, newline)
+    engine.append(newline)
 
     return engine
 
@@ -26,7 +24,7 @@ def is_symbol(char):
 
 def find_parts():
 
-    engine = get_engine(border = True)
+    engine = get_engine()
 
     total = 0
 
@@ -57,4 +55,42 @@ def find_parts():
 
     return total
 
+def find_gears():
+
+    engine = get_engine()
+
+    gear_ratio = 0
+
+    for row, line in enumerate(engine):
+
+        gears = re.findall(r'[*]', line)
+        igears = [c.start(0) for c in re.finditer(r'[*]', line)]
+
+        if gears != []:
+        
+            for ig, g in enumerate(gears):
+                ig = igears[ig]
+
+                adj_nums, num_around, i_around = [], [], []
+
+                num_around += re.findall(r'\d+', engine[row-1])
+                num_around += re.findall(r'\d+', engine[row])
+                num_around += re.findall(r'\d+', engine[row+1])
+
+                i_around += [(c.start(0), c.end(0)-1) for c in re.finditer(r'\d+', engine[row-1])]
+                i_around += [(c.start(0), c.end(0)-1) for c in re.finditer(r'\d+', engine[row])]
+                i_around += [(c.start(0), c.end(0)-1) for c in re.finditer(r'\d+', engine[row+1])]
+
+                for i, num in enumerate(num_around):
+                    start, end = i_around[i]
+
+                    if end == ig or end == ig-1 or end == ig+1 or start == ig or start == ig+1 or start == ig-1:
+                        adj_nums.append(int(num))
+
+                if len(adj_nums) == 2:
+                    gear_ratio += adj_nums[0]*adj_nums[1]
+
+    return gear_ratio
+    
 print('Part 1:', find_parts())
+print('Part 2:', find_gears())
