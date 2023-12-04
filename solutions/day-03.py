@@ -48,9 +48,7 @@ def find_parts():
 
             around += above + left + right + below
 
-            is_part = any(is_symbol(c) for c in around)
-
-            if is_part:
+            if any(is_symbol(c) for c in around):
                 total += int(num)
 
     return total
@@ -63,13 +61,11 @@ def find_gears():
 
     for row, line in enumerate(engine):
 
-        gears = re.findall(r'[*]', line)
-        igears = [c.start(0) for c in re.finditer(r'[*]', line)]
+        gears = [c.start(0) for c in re.finditer(r'[*]', line)]
 
         if gears != []:
         
-            for ig, g in enumerate(gears):
-                ig = igears[ig]
+            for g in gears:
 
                 adj_nums, num_around, i_around = [], [], []
 
@@ -84,7 +80,7 @@ def find_gears():
                 for i, num in enumerate(num_around):
                     start, end = i_around[i]
 
-                    if end == ig or end == ig-1 or end == ig+1 or start == ig or start == ig+1 or start == ig-1:
+                    if g-1 <= end <= g+1 or g-1 <= start <= g+1:
                         adj_nums.append(int(num))
 
                 if len(adj_nums) == 2:
