@@ -5,7 +5,7 @@ import regex as re
 
 def get_cards():
 
-    input = getinput(day = '04', example=False)
+    input = getinput(day = '04', example=True)
 
     for i, line in enumerate(input):
 
@@ -26,16 +26,14 @@ def get_points():
     cards = get_cards()
 
     for card in cards:
-        win, game = card
-
+        
         points = 0
 
-        for g in game:
-            if g in win:
-                if points == 0: 
-                    points +=1
-                else: 
-                    points*=2
+        win, game = card
+        n_overlap = len(win+game) - len(set(win+game))
+
+        if n_overlap != 0:
+            points = 2**(n_overlap-1)
 
         total += points
 
