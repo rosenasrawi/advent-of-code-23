@@ -9,7 +9,6 @@ def list_nums(line):
 def find_location():
 
     input = getinput(day='05', example=False)
-
     seeds = list_nums(input.pop(0)); input.pop(0)
 
     for line in input:
@@ -19,14 +18,13 @@ def find_location():
 
         if any(c.isnumeric() for c in line):
 
-            d_start, s_start, n = list_nums(line)
-            s_end = s_start + n-1
-
-            dif = d_start - s_start
+            dest, s_map, n = list_nums(line)
+            e_map = s_map + n-1
+            dif = dest - s_map
 
             for i, seed in enumerate(seeds):
 
-                if s_start <= seed <= s_end:
+                if s_map <= seed <= e_map:
                     new[i] = seed + dif
             
         if line == '' or line == input[-1]:
@@ -34,90 +32,58 @@ def find_location():
 
     return min(seeds)
 
+def find_ranges():
+
+    input = getinput(day='05', example=False)
+    seeds = list_nums(input.pop(0)); input.pop(0)
+    ranges = [[seeds[i], seeds[i+1]+ seeds[i]-1] for i in range(0,len(seeds),2)]
+
+    for line in input:
+
+        if 'map' in line:
+            new = []
+        
+        if any(c.isnumeric() for c in line):
+
+            dest, s_map, n = list_nums(line)
+            e_map = s_map + n-1
+            dif = dest - s_map
+
+            for i, curr_range in enumerate(ranges):
+                s_range, e_range = curr_range
+                
+                if s_map <= s_range and e_range <= e_map:
+                    curr_range = [r+dif for r in curr_range]
+                    new.append(curr_range)
+                    ranges[i] = None
+                
+                if s_range < s_map and s_map <= e_range <= e_map:
+
+                    overlap_range = [s_map, e_range]
+                    overlap_range = [r+dif for r in overlap_range]
+                    new.append(overlap_range)
+
+                    out_range = [s_range, s_map-1]
+                    ranges[i] = None; ranges.append(out_range)
+
+                if s_map <= s_range <= e_map and e_range > e_map:
+
+                    overlap_range = [s_range, e_map]
+                    overlap_range = [r+dif for r in overlap_range]
+                    new.append(overlap_range)
+
+                    out_range = [e_map+1, e_range]
+                    ranges[i] = None; ranges.append(out_range)
+            
+            ranges = [r for r in ranges if r is not None]
+
+        if line == '' or line == input[-1]:
+            new += ranges
+            ranges = new.copy()
+
+    return min(ranges)[0]
+
 print('Part 1:', find_location())
-
-input = getinput(day='05', example=True)
-seeds = list_nums(input.pop(0)); input.pop(0)
-
-seeds = [[seeds[i], seeds[i+1]] for i in range(0, len(seeds), 2)]
-
-for line in input:
-
-    if 'map' in line:
-        new = []
-
-    if any(c.isnumeric() for c in line):
-
-        d_start, s_start, n = list_nums(line)
-        s_end = s_start + n-1
-
-        dif = d_start - s_start
-
-        for seed in seeds:
-            s1 = seed[0]
-            s2 = sum(seed)-1
-            s3 = seed[1]
-
-            start_in = s_start <= s1 <= s_end
-            end_in = s_start <= s2 <= s_end
-
-            start_left = s1 < s_start
-            start_right = s1 > s_end
-            
-            end_left = s2 < s_start
-            end_right = s2 > s_end
-
-            # no overlap
-            if start_right or end_left:
-                new.append(seed)
-            
-            # full overlap
-            if start_in and end_in:
-                seed[0] += dif
-                new.append(seed)
-
-            # right overlap
-            if start_left and end_in:
-
-                len_r = s2 - s_start + 1
-                len_l = s3 - len_r
-
-                seed_r = [s_start + dif, len_r]
-                seed_l = [s1, len_l]
-
-                new.append(seed_r)
-                seeds.append(seed_l)
-
-            # left overlap
-            if start_in and end_right:
-
-                len_l = s_end - s1 + 1
-                len_r = s3 - len_l
-
-                seed_l = [s1 + dif, len_l]
-                seed_r = [s_end+1, len_l]
-
-                new.append(seed_l)
-                seeds.append(seed_r)
-
-            # mid overlap
-            if start_left and end_right:
-
-                len_m = n
-                len_l = s3 - (s2 - s_start)
-                len_r = s3 - (s_end - s1)
-
-                seed_m = [s_start + dif, n]
-                seed_l = [s1, len_l]
-                seed_r = [s2+1, len_r]
-
-                new.append(seed_m)
-                seeds.append(seed_l)
-                seeds.append(seed_r)
-
-    if line == '' or line == input[-1]:
-        seeds = new.copy()
-
-print(seeds)
+print('Part 2:', find_ranges())
 
 
