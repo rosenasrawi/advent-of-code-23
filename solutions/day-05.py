@@ -53,6 +53,7 @@ def find_ranges():
                 s_range, e_range = curr_range
                 
                 if s_map <= s_range and e_range <= e_map:
+                    
                     curr_range = [r+dif for r in curr_range]
                     new.append(curr_range)
                     ranges[i] = None
@@ -85,5 +86,3 @@ def find_ranges():
 
 print('Part 1:', find_location())
 print('Part 2:', find_ranges())
-
-
