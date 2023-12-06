@@ -1,5 +1,7 @@
 from _getinput import *
+
 import regex as re
+from math import sqrt, ceil, floor
 
 # --- Day 6: Wait For It ---
 
@@ -24,7 +26,7 @@ def beat_record():
 
 def beat_big_record():
 
-    input = getinput(day='06', example=True)
+    input = getinput(day='06', example=False)
     time, dist = [int(''.join(re.findall(r'\d',line))) for line in input]
 
     record = 0
@@ -35,5 +37,18 @@ def beat_big_record():
 
     return record
 
+def race_math():
+    
+    input = getinput(day='06', example=False)
+    time, dist = [int(''.join(re.findall(r'\d',line))) for line in input]
+
+    records = time**2 - 4*dist
+    beat1 = (time + sqrt(records))/2
+    beat2 = (time - sqrt(records))/2
+
+    return ceil(beat1) - floor(beat2) - 1
+
+
 print('Part 1:', beat_record())
 print('Part 2:', beat_big_record())
+print('Part 2, maths:', race_math())
