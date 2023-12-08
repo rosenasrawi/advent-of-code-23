@@ -1,22 +1,25 @@
 from _getinput import *
 from collections import Counter
+from itertools import product
 
 # --- Day 7: Camel Cards ---
 
-def card2nums(card):
+def card2nums(card, joker = False):
 
     card_nums = {'A': 14, 'K': 13, 'Q': 12, 'J': 11, 'T': 10}
+
+    if joker: card_nums['J'] = 0
 
     card = [card_nums[c] if c in card_nums else int(c) for c in card]
 
     return card
 
-def get_cards():
+def get_cards(joker = False):
 
     input = getinput(day='07', example=False)
     input = [line.split() for line in input]
 
-    cards = [card2nums(list(card)) for card, _ in input]
+    cards = [card2nums(list(card),joker) for card, _ in input]
     bids = [int(bid) for _, bid in input]
 
     return cards, bids
@@ -38,13 +41,44 @@ def check_hand(card):
 
     return hand_type[match.index(True)]
 
-def sort_cards():
+def check_joker(card):
+    best_hand = 0
 
-    cards, bids = get_cards()
-    hands = [check_hand(card) for card in cards]
+    jokers = [i for i, c in enumerate(card) if c == 0]
+    sub_options = list(product(range(2, 15), repeat=len(jokers)))
+
+    for sub in sub_options:
+        sub_card = card.copy()
+        
+        for j, s in zip(jokers, sub):
+            sub_card[j] = s
+        
+        hand = check_hand(sub_card)
+        
+        if hand > best_hand:
+            best_hand = hand
+    
+    return best_hand
+
+def get_hands(joker = False):
+
+    cards, bids = get_cards(joker)
+    hands = []
+
+    for card in cards:
+        if joker and 0 in card:
+            hands.append(check_joker(card))
+        else:
+            hands.append(check_hand(card))
+
     cards = list(zip(hands, bids, cards))
-    cards = list(sorted(cards, key=lambda x:x[0], reverse=True))
+    cards = list(sorted(cards, key=lambda x:x[0], reverse=True))    
 
+    return cards, bids
+
+def sort_cards(joker = False):
+
+    cards, bids = get_hands(joker)
     cards_sorted = []
 
     for i, card in enumerate(cards):
@@ -54,20 +88,19 @@ def sort_cards():
         if len(cards_sorted) != 1:
 
             move = i
-            in_place = False
 
-            while not in_place:
+            while True:
 
                 hp, bp, cp = cards_sorted[move-1]
                 hn, bn, cn = cards_sorted[move]
 
-                if hp > hn: # never past another hand
+                if hp > hn:
                     break
 
-                if hp == hn: # same hand, then compare
+                if hp == hn:
 
                     for j in range(len(cp)):
-                        if cp[j] < cn[j]: # switch cards
+                        if cp[j] < cn[j]:
                             cards_sorted[move-1] = [hn, bn, cn]
                             cards_sorted[move] = [hp, bp, cp]
                             break
@@ -75,14 +108,7 @@ def sort_cards():
                             break
                     
                 move -= 1
-
                 if move == 0: break
-
-    return cards_sorted
-
-def get_ranks():
-
-    cards_sorted = sort_cards()
 
     bid_multiply = list(range(len(cards_sorted), 0, -1))
     bids = [b for _, b, _ in cards_sorted]
@@ -94,4 +120,5 @@ def get_ranks():
 
     return total
 
-print('Part 1:', get_ranks())
+print('Part 1:', sort_cards())
+print('Part 2:', sort_cards(joker=True))
