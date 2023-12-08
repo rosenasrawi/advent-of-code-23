@@ -34,7 +34,7 @@ def find_location():
 
 def find_ranges():
 
-    input = getinput(day='05', example=True)
+    input = getinput(day='05', example=False)
     seeds = list_nums(input.pop(0)); input.pop(0)
     ranges = [[seeds[i], seeds[i+1]+ seeds[i]-1] for i in range(0,len(seeds),2)]
 
@@ -81,7 +81,6 @@ def find_ranges():
         if line == '' or line == input[-1]:
             new += ranges
             ranges = new.copy()
-            print(ranges)
 
     return min(ranges)[0]
 
