@@ -1,5 +1,6 @@
 from _getinput import *
 from collections import Counter
+from functools import cmp_to_key
 
 # --- Day 7: Camel Cards ---
 
@@ -11,16 +12,6 @@ def card2nums(card, joker = False):
     card = [card_nums[c] if c in card_nums else int(c) for c in card]
 
     return card
-
-def get_cards(joker = False):
-
-    input = getinput(day='07', example=False)
-    input = [line.split() for line in input]
-
-    cards = [card2nums(list(card),joker) for card, _ in input]
-    bids = [int(bid) for _, bid in input]
-
-    return cards, bids
 
 def check_hand(card):
 
@@ -42,55 +33,39 @@ def check_hand(card):
     elif len(counts) == 4: return 2
     elif len(counts) == 5: return 1
 
+def sort_cards(hand1, hand2):
+
+    for h1, h2 in zip(hand1[0], hand2[0]):
+        if h1 == h2:
+            continue
+        elif h1 > h2:
+            return 1
+        elif h1 < h2:
+            return -1
+    return 0
+
 def get_hands(joker = False):
 
-    cards, bids = get_cards(joker)
-    hands = [check_hand(card) for card in cards]
+    input = getinput(day='07', example=False)
+    input = [line.split() for line in input]
 
-    cards = list(zip(hands, bids, cards))
-    cards = list(sorted(cards, key=lambda x:x[0], reverse=True))    
+    cards = [card2nums(list(card),joker) for card, _ in input]
+    bids = [int(bid) for _, bid in input]
 
-    return cards
+    hands = [[check_hand(card)] + card for card in cards]
+    hands = list(zip(hands,bids))
 
-def sort_cards(joker = False):
+    return hands
 
-    cards = get_hands(joker)
-    cards_sorted = []
+def get_sorted(joker = False):
 
-    for i, card in enumerate(cards):
-        
-        cards_sorted.append(card)
+    hands = get_hands(joker)
+    hands = sorted(hands, key = cmp_to_key(sort_cards))
 
-        if len(cards_sorted) != 1:
+    ranks = list(range(1, len(hands)+1))
+    bids = [b for _, b in hands]
 
-            move = i
+    return sum([r * b for r, b in zip(ranks,bids)])
 
-            while True:
-
-                hp, bp, cp = cards_sorted[move-1]
-                hn, bn, cn = cards_sorted[move]
-
-                if hp > hn:
-                    break
-
-                if hp == hn:
-
-                    for j in range(len(cp)):
-                        if cp[j] < cn[j]:
-                            cards_sorted[move-1] = [hn, bn, cn]
-                            cards_sorted[move] = [hp, bp, cp]
-                            break
-                        elif cp[j] > cn[j]:
-                            break
-                    
-                move -= 1
-                if move == 0: break
-
-    ranks = list(range(len(cards_sorted), 0, -1))
-    bids = [b for _, b, _ in cards_sorted]
-    total = sum([r*b for r,b in zip(ranks,bids)])
-
-    return total
-
-print('Part 1:', sort_cards())
-print('Part 2:', sort_cards(joker=True))
+print('Part 1:', get_sorted())
+print('Part 2:', get_sorted(joker=True))
