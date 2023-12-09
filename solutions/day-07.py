@@ -1,6 +1,5 @@
 from _getinput import *
 from collections import Counter
-from itertools import product
 
 # --- Day 7: Camel Cards ---
 
