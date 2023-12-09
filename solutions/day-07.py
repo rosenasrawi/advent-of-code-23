@@ -7,7 +7,6 @@ from itertools import product
 def card2nums(card, joker = False):
 
     card_nums = {'A': 14, 'K': 13, 'Q': 12, 'J': 11, 'T': 10}
-
     if joker: card_nums['J'] = 0
 
     card = [card_nums[c] if c in card_nums else int(c) for c in card]
@@ -26,59 +25,37 @@ def get_cards(joker = False):
 
 def check_hand(card):
 
-    counts = Counter(card)
-    hand_type = list(range(7,0,-1))
+    nj = card.count(0)
+
+    if nj == 5: return 7
+
+    card = [c for c in card if c != 0]
+    counts = list(Counter(card).values())
+    counts[counts.index(max(counts))]+= nj
+
+    counts.sort()
     
-    match = [
-        any(count == 5 for count in counts.values()),
-        any(count == 4 for count in counts.values()),
-        set(counts.values()) == {2, 3},
-        any(count == 3 for count in counts.values()) and len(counts) == 3,
-        list(counts.values()).count(2) == 2,
-        2 in counts.values() and len(counts) == 4,
-        len(counts) == 5,
-    ]
-
-    return hand_type[match.index(True)]
-
-def check_joker(card):
-    best_hand = 0
-
-    jokers = [i for i, c in enumerate(card) if c == 0]
-    sub_options = list(product(range(2, 15), repeat=len(jokers)))
-
-    for sub in sub_options:
-        sub_card = card.copy()
-        
-        for j, s in zip(jokers, sub):
-            sub_card[j] = s
-        
-        hand = check_hand(sub_card)
-        
-        if hand > best_hand:
-            best_hand = hand
-    
-    return best_hand
+    if 5 in counts: return 7
+    elif 4 in counts: return 6
+    elif counts == [2,3]: return 5
+    elif counts == [1,1,3]: return 4
+    elif counts == [1,2,2]: return 3
+    elif len(counts) == 4: return 2
+    elif len(counts) == 5: return 1
 
 def get_hands(joker = False):
 
     cards, bids = get_cards(joker)
-    hands = []
-
-    for card in cards:
-        if joker and 0 in card:
-            hands.append(check_joker(card))
-        else:
-            hands.append(check_hand(card))
+    hands = [check_hand(card) for card in cards]
 
     cards = list(zip(hands, bids, cards))
     cards = list(sorted(cards, key=lambda x:x[0], reverse=True))    
 
-    return cards, bids
+    return cards
 
 def sort_cards(joker = False):
 
-    cards, bids = get_hands(joker)
+    cards = get_hands(joker)
     cards_sorted = []
 
     for i, card in enumerate(cards):
@@ -110,13 +87,9 @@ def sort_cards(joker = False):
                 move -= 1
                 if move == 0: break
 
-    bid_multiply = list(range(len(cards_sorted), 0, -1))
+    ranks = list(range(len(cards_sorted), 0, -1))
     bids = [b for _, b, _ in cards_sorted]
-
-    total = 0
-
-    for i, b in enumerate(bids):
-        total += b*bid_multiply[i]
+    total = sum([r*b for r,b in zip(ranks,bids)])
 
     return total
 
