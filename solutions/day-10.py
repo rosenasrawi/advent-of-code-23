@@ -13,10 +13,12 @@ def get_start():
             c = line.index('S')
             adj = [[r-1,c], [r+1,c], [r,c-1], [r,c+1]]
 
-            return adj, input
+            return adj, [r,c], input
 
 def find_loop():
     
+    loop = []
+
     moves = {
         'n': {'7':'w', '|':'n' , 'F':'e'},
         's': {'J':'w', '|':'s' , 'L':'e'},
@@ -29,7 +31,8 @@ def find_loop():
         'w': (0,-1), 'e': (0,1)
     }
 
-    adj, input = get_start()
+    adj, start, input = get_start()
+    loop.append(start)
 
     for i, pos in enumerate(adj):
         pipe = input[pos[0]][pos[1]]
@@ -44,6 +47,7 @@ def find_loop():
     while True:
 
         pos, pipe, dir = current
+        loop.append(pos)
         rd, cd = update[dir]
         
         pos = [pos[0]+rd, pos[1]+cd]
@@ -56,6 +60,40 @@ def find_loop():
         current = (pos, pipe, dir)
         steps+=1
     
-    return steps//2
+    return steps//2, loop, input
 
-print('Part 1:', find_loop())
+def find_inner(loop, input):
+
+    enclosed = 0
+    cmax = len(input[0])
+    rmax = len(input)
+    loop_set = set(map(tuple, loop))
+
+    for r, line in enumerate(input):
+        for c, pipe in enumerate(line):
+            
+            if (r, c) in loop_set:
+                continue
+            
+            crosses = 0
+            r2, c2 = r, c
+
+            while c2 < cmax and r2 < rmax:
+
+                pipe = input[r2][c2]
+                
+                if (r2, c2) in loop_set and pipe not in ['L', '7']:
+                    crosses += 1
+                
+                r2 += 1
+                c2 += 1
+
+            if crosses % 2 == 1:
+                enclosed += 1
+                
+    return enclosed
+
+steps, loop, input = find_loop()
+
+print('Part 1:', steps)
+print('Part 1:', find_inner(loop, input))
