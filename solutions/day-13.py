@@ -8,7 +8,6 @@ def get_maps():
     maps = []; map = []
 
     for line in input:
-        
         if line == '': 
             maps.append(map); map = []
         else:
@@ -18,18 +17,17 @@ def get_maps():
 
     return maps
 
-def find_mirror(map):
+def check_reflection(map):
 
     mirror, smudge = 0, 0
 
     for i in range(1,len(map)):
 
-        left = list(range(0,i))
-        left.reverse()
+        left = list(range(0,i)); left.reverse()
         right = list(range(i,len(map)))
 
-        combos = list(zip(left,right))
         difference = 0
+        combos = list(zip(left,right))
 
         for l,r in combos:
             l = map[l]; r = map[r]
@@ -37,30 +35,29 @@ def find_mirror(map):
 
         if difference == 0:
             mirror = i
-        
         if difference == 1:
             smudge = i
 
     return mirror, smudge
 
-def get_reflect():
+def find_mirrors():
 
     maps = get_maps()
-    reflection, smudge = 0, 0
+    mirror, smudge = 0, 0
 
     for hor_map in maps:
         
-        m_hor, s_hor = find_mirror(hor_map)
-
         vert_map = list(map(list, zip(*hor_map)))
-        m_vert, s_vert = find_mirror(vert_map)
 
-        reflection += m_hor*100 + m_vert
+        m_hor, s_hor = check_reflection(hor_map)
+        m_vert, s_vert = check_reflection(vert_map)
+
+        mirror += m_hor*100 + m_vert
         smudge += s_hor*100 + s_vert
 
-    return reflection, smudge
+    return mirror, smudge
 
-reflection, smudge = get_reflect()
+mirror, smudge = find_mirrors()
 
-print('Part 1:', reflection)
+print('Part 1:', mirror)
 print('Part 2:', smudge)
