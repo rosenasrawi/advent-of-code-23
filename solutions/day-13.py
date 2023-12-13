@@ -2,15 +2,15 @@ from _getinput import *
 
 # --- Day 13: Point of Incidence ---
 
-def get_maps(maps = [], map = []):
+def get_maps():
 
     input = getinput(day='13', example=False)
-    
+    maps = []; map = []
+
     for line in input:
         
         if line == '': 
-            maps.append(map)
-            map = []
+            maps.append(map); map = []
         else:
             map.append(line)
 
@@ -20,53 +20,47 @@ def get_maps(maps = [], map = []):
 
 def find_mirror(map):
 
-    mirror = None
+    mirror, smudge = 0, 0
 
     for i in range(1,len(map)):
-        prev = map[i-1]
-        line = map[i]
 
-        if prev == line:
-            left = list(range(0,i))
-            right = list(range(i,len(map)))
-            left.reverse()
+        left = list(range(0,i))
+        left.reverse()
+        right = list(range(i,len(map)))
 
-            mirror = list(zip(left,right))
-            print(mirror)
-            break
+        combos = list(zip(left,right))
+        difference = 0
 
-    if mirror == None:
-        return 0
-    
-    for l,r in mirror:
-        if map[l] != map[r]:
-            return 0
+        for l,r in combos:
+            l = map[l]; r = map[r]
+            difference += sum([l[j]!=r[j] for j in range(len(l))])
 
-    return i
+        if difference == 0:
+            mirror = i
+        
+        if difference == 1:
+            smudge = i
 
-maps = get_maps()
-total = 0
+    return mirror, smudge
 
-for hor_map in maps:
-    print('-----------------')
-    for h in hor_map:
-        print(h)
-    
-    n_hor = find_mirror(hor_map)*100
-    print('hor', n_hor)
+def get_reflect():
 
-    vert_map = list(map(list, zip(*hor_map)))
-    vert_map = [''.join(l) for l in vert_map]
+    maps = get_maps()
+    reflection, smudge = 0, 0
 
-    print('-----------------')
+    for hor_map in maps:
+        
+        m_hor, s_hor = find_mirror(hor_map)
 
-    for v in vert_map:
-        print(v)
-    
-    n_vert = find_mirror(vert_map)
-    print('ver', n_vert)
+        vert_map = list(map(list, zip(*hor_map)))
+        m_vert, s_vert = find_mirror(vert_map)
 
-    total += n_hor + n_vert
+        reflection += m_hor*100 + m_vert
+        smudge += s_hor*100 + s_vert
 
-print(total)
+    return reflection, smudge
 
+reflection, smudge = get_reflect()
+
+print('Part 1:', reflection)
+print('Part 2:', smudge)
