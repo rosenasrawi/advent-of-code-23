@@ -3,6 +3,14 @@ from functools import cache
 
 # --- Day 12: Hot Springs ---
 
+def get_springs():
+    input = getinput(day='12', example=False)
+    input = [line.split() for line in input]
+    
+    return [[springs,
+            list(map(int, counts.split(',')))]
+            for springs, counts in input]
+
 @cache
 def check_group(springs, counts, g_id = -1, count = 0):
 
@@ -31,7 +39,6 @@ def check_group(springs, counts, g_id = -1, count = 0):
             else:
                 dmgd = check_group('#' + springs[i+1:], counts, g_id, count)
                 oprt = check_group( '.' + springs[i+1:], counts, g_id, count)
-
                 return dmgd + oprt
             
     if count == 0 and g_id == len(counts)-1:
@@ -41,15 +48,21 @@ def check_group(springs, counts, g_id = -1, count = 0):
     else:
         return 0
 
-input = getinput(day='12',example=False)
-input = [line.split() for line in input]
+def find_possible(unfold = False):
+    
+    input = get_springs()
 
-input = [[springs, 
-          list(map(int, counts.split(',')))]
-          for springs, counts in input]
+    if unfold:
+        for i, line in enumerate(input):
+            springs, counts = line
+            input[i] = ["?".join([springs] * 5),
+                        counts * 5]
 
-total = 0
-for springs, counts in input:
-    total += check_group(springs, tuple(counts))
+    total = 0
+    for springs, counts in input:
+        total += check_group(springs, tuple(counts))
 
-print(total)
+    return total
+
+print('Part 1:', find_possible())
+print('Part 1:', find_possible(unfold=True))
