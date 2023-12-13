@@ -1,52 +1,36 @@
 from _getinput import *
+from functools import cache
 
 # --- Day 12: Hot Springs ---
 
-def check_group(springs, counts, memo, g_id = -1, count = 0):
-    
-    this_try = (springs, g_id, count)
-
-    if this_try in memo:
-        return memo[this_try]
+@cache
+def check_group(springs, counts, g_id = -1, count = 0):
 
     for i, s in enumerate(springs):
 
         if s == '#':
-
-            if count == 0: # new group
+            if count == 0:
                 g_id+=1
-            if g_id > len(counts)-1: # too many groups
+            if g_id > len(counts)-1:
                 return 0
+            count += 1
             
-            count += 1 # add to group
-            
-            if count > counts[g_id]: # larger than current group
+            if count > counts[g_id]:
                 return 0
         
         elif s == '.':
-
-            if 0 < count < counts[g_id]: # closed and smaller than current group
+            if 0 < count < counts[g_id]:
                 return 0
-            
-            count = 0 # end the group
+            count = 0
 
         elif s == '?':
-
-            if g_id >= 0 and 0 < count < counts[g_id]: # group not yet filled
+            if g_id >= 0 and 0 < count < counts[g_id]:
                 count += 1
-            elif g_id >= 0 and count == counts[g_id]: # group already filled
+            elif g_id >= 0 and count == counts[g_id]:
                 count = 0
-
             else:
-                damaged = '#' + springs[i+1:]
-
-                dmgd = check_group(damaged, counts, memo, g_id, count)
-                memo[(damaged, g_id, count)] = dmgd
-
-                operational = '.' + springs[i+1:]
-
-                oprt = check_group(operational, counts, memo, g_id, count)
-                memo[(operational, g_id, count)] = oprt
+                dmgd = check_group('#' + springs[i+1:], counts, g_id, count)
+                oprt = check_group( '.' + springs[i+1:], counts, g_id, count)
 
                 return dmgd + oprt
             
@@ -57,7 +41,6 @@ def check_group(springs, counts, memo, g_id = -1, count = 0):
     else:
         return 0
 
-
 input = getinput(day='12',example=False)
 input = [line.split() for line in input]
 
@@ -67,7 +50,6 @@ input = [[springs,
 
 total = 0
 for springs, counts in input:
-    memo = {}
-    total += check_group(springs, counts, memo)
+    total += check_group(springs, tuple(counts))
 
 print(total)
