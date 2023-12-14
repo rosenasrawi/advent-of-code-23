@@ -2,37 +2,33 @@ from _getinput import *
 
 # --- Day 14: Parabolic Reflector Dish ---
 
-def find_stones(input):
-    stones = []
+def tilt_lever(input):
 
-    for r, line in enumerate(input):
-        if 'O' in line:
-            pos = [i for i,c in enumerate(line) if c == 'O']
-            for p in pos: stones.append([r,p])
-    return stones
+    for y, line in enumerate(input):
+        for x, char in enumerate(line):
 
-def tilt_lever(stones, input):
+            if char == 'O':
+                r,c = y,x
 
-    for stone in stones:
-        r,c = stone
-        while True:
-            if r==0: break
-            if input[r-1][c] == '.':
-                input[r][c] = '.'
-                r-=1
-                input[r][c] = 'O'
-            else:
-                break
+                while True:
+                    if r==0: 
+                        break
+                    if input[r-1][c] == '.':
+                        input[r][c] = '.'
+                        r-=1
+                        input[r][c] = 'O'
+                    else:
+                        break
     
     return input
 
 def get_load(input):
-    num_stones = [line.count('O') for line in input]
-    weight = list(range(len(num_stones),0,-1))
+    n_stones = [line.count('O') for line in input]
+    weights = list(range(len(n_stones),0,-1))
 
     total = 0
-    for i in range(len(weight)):
-        total+= weight[i]*num_stones[i]
+    for i in range(len(weights)):
+        total+= weights[i] * n_stones[i]
     
     return total
 
@@ -44,8 +40,7 @@ def total_load():
     input = getinput(day='14', example=False)
     input = [list(line) for line in input]
 
-    stones = find_stones(input)
-    input = tilt_lever(stones,input)
+    input = tilt_lever(input)
 
     return get_load(input)
 
@@ -60,8 +55,7 @@ def find_cycle():
     while True:
 
         for _ in range(4):
-            stones = find_stones(input)
-            input = tilt_lever(stones,input)
+            input = tilt_lever(input)
             input = turn_platform(input)
 
         tup_input = tuple(''.join(line) for line in input)
@@ -73,8 +67,7 @@ def find_cycle():
 
             for _ in range(left):
                 for _ in range(4):
-                    stones = find_stones(input)
-                    input = tilt_lever(stones,input)
+                    input = tilt_lever(input)
                     input = turn_platform(input)
 
             return get_load(input)
