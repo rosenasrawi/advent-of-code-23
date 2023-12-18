@@ -2,65 +2,51 @@ from _getinput import *
 
 # --- Day 18: Lavaduct Lagoon ---
 
-def dig_out():
+def dig_lagoon(expand = False):
 
-    input = getinput(day='18',example=False)
+    input = getinput(day='18', example=False)
     input = [line.split() for line in input]
 
+    if expand:
+        input = [line[-1] for line in input]
+        d = {'0':'R', '1':'D', '2':'L', '3':'U'}
+
+        for i, line in enumerate(input):
+            input[i] = (d[line[-2]], int(line[2:-2],16))
+
+    else:
+        input = [(dir,int(steps)) for dir, steps, _ in input]
+
     dirs = {'R':(0,1), 'L': (0,-1), 'U': (-1,0), 'D': (1,0)}
-    digs = {(0,0)}; start = (0,0)
-
-    for dir, steps, _ in input:
-
-        r, c = start
-        rd, cd = dirs[dir]
-
-        for _ in range(int(steps)):
-            r+=rd; c+=cd
-            digs.add((r,c))
-
-        start = (r,c)
-
-    rmin, cmin = min(r for r,_ in digs), min(c for _,c in digs)
-    digs = [(r + abs(rmin), c + abs(cmin)) for r, c in digs]
-
-    rmax, cmax = max(r for r,_ in digs), max(c for _,c in digs)
-    digmap = [['🎄']*(cmax+1) for _ in range(rmax+1)]
-
-    for r,c in digs:
-        digmap[r][c] = '🎁'
     
-    return digmap, len(digs)
+    digs = [(0,0)]
+    r,c = 0,0
+    area = 0
 
-def fill_lagoon():
+    for dir, steps in input:
 
-    digmap, outline = dig_out()
+        rd, cd = dirs[dir]
+        r += rd * steps; c += cd * steps
+        
+        digs.append((r,c))
+        area+=steps
 
-    def find_start(pattern = '🎄🎁🎄'):
+    return digs[:-1], area
 
-        for r, line in enumerate(digmap):
-            for c in range(len(line)):
-                if ''.join(line[c-1:c+2]) == pattern:
-                    return (r,c+1)
+def fill_lagoon(expand=False):
 
-    surround = [(0,1),(1,0),(0,-1),(-1,0),
-                (1,1),(-1,-1),(-1,1),(1,-1)]
+    digs, area = dig_lagoon(expand)
 
-    filled = set()
-    queue = {find_start()}
+    def shoelace(coord, area = 0):
 
-    while queue:
-        r,c = queue.pop()
-        filled.add((r,c))
+        for i in range(len(coord)):
+            area += coord[i][0] * (coord[i - 1][1] - coord[(i + 1) % len(coord)][1])
 
-        for rd, cd in surround:
-            next = digmap[r+rd][c+cd]
-            i_next = (r+rd, c+cd)
+        return abs(area) // 2
 
-            if i_next not in filled:
-                if next != '🎁':
-                    queue.add(i_next)
+    area += shoelace(digs) - area // 2 + 1
 
-    return outline + len(filled)
+    return area
 
 print('Part 1:', fill_lagoon())
+print('Part 2:', fill_lagoon(expand = True))
