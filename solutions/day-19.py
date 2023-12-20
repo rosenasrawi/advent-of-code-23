@@ -8,13 +8,11 @@ def parse_hell():
     input = getinput(day='19',example=False)
     
     parts  = input[input.index('')+1:]
-
     parts = [p.replace('=',':') for p in parts]
     parts = [re.sub(r'([a-z])', r"'\1'", p) for p in parts]
     parts = [eval(p) for p in parts]
 
     workflow = input[:input.index('')]
-
     rules = {}
 
     for flow in workflow:
@@ -26,36 +24,38 @@ def parse_hell():
 
     return parts, rules
 
-def move_parts():
+def eval_part(part, rules):
 
-    parts, rules = parse_hell()
-    A, item = [], 'in'
+    item = 'in'
 
-    for part in parts:
-        rule = rules[item].copy()
+    while True:
 
-        while rule:
-            it = rule.pop(0)
+        if item == 'A': return True
+        if item == 'R': return False
+        
+        rule = rules[item]
 
-            if it == ['A']:
-                A.append(part); break
-            if it == ['R']: break
+        for rl in rule:
 
-            if len(it) == 2:
-                r, it = it
+            if len(rl) == 2:
+                r, item = rl
                 r = r.replace(r[0], str(part[r[0]]))
 
                 if eval(r):
-                    if it == 'A':
-                        A.append(part); break
-                    if it == 'R': break
-                    else:
-                        rule = rules[it].copy()
-                        continue
-            else:
-                rule = rules[it[0]].copy()
-                continue
+                    break
 
-    return sum([sum(p.values()) for p in A])
+            else:
+                item = rl[0]
+                break
+
+def move_parts(accept = 0):
+
+    parts, rules = parse_hell()
+
+    for part in parts:
+        if eval_part(part, rules):
+            accept += sum([p for p in part.values()])
+
+    return accept
 
 print('Part 1:', move_parts())
